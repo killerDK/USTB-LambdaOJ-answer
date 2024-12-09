@@ -4,7 +4,7 @@
 
 ## 23年物联网与信安大二实验部分题题解，欢迎补充指正以及增加别的解题方式
 
-提示：据验证，快读在读入这里的大部分题目时候性能不如关闭同步流的 cin\cout 。且这里大部分题目空间卡的都很死，推荐使用动态数组进行空间管理。
+提示：据验证，快读在读入这里的大部分题目时候性能不如关闭同步流的 cin\cout 。且这里大部分题目空间卡的都很死，推荐使用动态数组进行空间管理。本项目的**正解**均为老师课上讲的方法。
 
 ## 1. [A + B Problem](https://ustb.lambdaoj.com:9999/#/problem/1001)
 
@@ -391,4 +391,69 @@ int main()
     return 0;
 }
 
+```
+
+## 7. [图最短路径](https://ustb.lambdaoj.com:9999/#/problem/1010)
+
+这道题十分怪异，他卡掉了常用的 dijkstra 算法，即使是堆优化的也过不了倒数**第二个**点，但是它奇特的能被 spfa （~~已死~~） 通过，推测他在倒数第二个点见了一个超长的链表。
+**正解**：分析数据可以发现，边长只有 123 这三种情况，所以我们可以把边拆开，在点与点之间添加虚拟点，把它转化成一个步长为 1 的图，用 bfs 求解。**但是!** 据我所知，没有人用这个方法 AC ，因为拆边加点阶段的开销太大不能接受。但直接用 bfs 却可以直接过，不需要拆点。所以就莫名其妙的 AC 了。如果有人用拆点的话，欢迎补充改正。
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+const int INF = 2147483647;
+int n, m, q;
+struct Edge
+{
+    int to, weight;
+};
+
+vector<int> bfs(int start, const vector<Edge> graph[], int n)
+
+{
+    vector<int> dis(n + 1, INF);
+    queue<int> q;
+
+    dis[start] = 0;
+    q.push(start);
+
+    while (!q.empty())
+    {
+        int u = q.front();
+        q.pop();
+        for (auto v : graph[u])
+        {
+            if (dis[v.to] > dis[u] + v.weight)
+            {
+                dis[v.to] = dis[u] + v.weight;
+                q.push(v.to);
+            }
+        }
+    }
+    return dis;
+}
+int main()
+{
+    ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+
+    cin >> n >> m >> q;
+    vector<Edge> g[n + 1];
+    for (int i = 1; i <= m; i++)
+    {
+        int u, v, w;
+        cin >> u >> v >> w;
+        g[u].push_back({v, w});
+        g[v].push_back({u, w});
+    }
+    vector<pair<int, int>> queries(q);
+    for (int i = 0; i < q; i++)
+    {
+        cin >> queries[i].first >> queries[i].second;
+    }
+    for (auto query : queries)
+    {
+        cout << bfs(query.first, g, n)[query.second] << endl;
+    }
+}
 ```
