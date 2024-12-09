@@ -288,65 +288,66 @@ int main()
 #include <bits/stdc++.h>
 using namespace std;
 
-static const auto io_sync_off = []() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(nullptr);
-    cout.tie(nullptr);
-    return nullptr;
-}();
+const int MAX_N = 16;
+const int MAX_M = 65536;
 
-static const int MAX_N = 16;
-static const int MAX_M = 65536;
-vector<unsigned short> foods;  // 每种食物包含的营养素状态
-unsigned short target;         // 目标营养素状态
-int n, m;        
+vector<unsigned short> foods;
+unsigned short target;
+int n, m;
 
+vector<int> dp;
+vector<int> prev_state;
+vector<int> choice;
 
-vector<int> dp;               
-vector<int> previous_state;    // 记录达到状态 s 时上一个状态
-vector<int> choice;            // 记录达到状态 s 时选择的食物
-
-void read_input() {
+void read_input()
+{
     cin >> n >> m;
     int temp;
-    for (int i = 0; i < m; i++) {
-        cin >> temp;  // 这里长度对我们来说没用，因为下面用 string 读的
+    for (int i = 0; i < m; i++)
+    {
+        cin >> temp;
     }
 
     target = 0;
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         cin >> temp;
         target |= (1 << temp);
     }
 
     foods.resize(m, 0);
-    for (int i = 0; i < m; i++) {
+    for (int i = 0; i < m; i++)
+    {
         string line;
         getline(cin >> ws, line);
         istringstream iss(line);
-        while (iss >> temp) {
+        while (iss >> temp)
+        {
             foods[i] |= (1 << temp);
         }
     }
 }
 
-bool process() {
+bool process()
+{
     int total_states = 1 << MAX_N;
     dp.assign(total_states, INT_MAX);
-    previous_state.assign(total_states, -1);
+    prev_state.assign(total_states, -1);
     choice.assign(total_states, -1);
     dp[0] = 0;
 
-    // 遍历所有可能的状态
-    for (int state = 0; state < total_states; state++) {
-        if (dp[state] == INT_MAX) continue;
+    for (int state = 0; state < total_states; state++)
+    {
+        if (dp[state] == INT_MAX)
+            continue;
 
-        // 尝试每种食物
-        for (int j = 0; j < m; j++) {
+        for (int j = 0; j < m; j++)
+        {
             int new_state = state | foods[j];
-            if (dp[state] + 1 < dp[new_state]) {
+            if (dp[state] + 1 < dp[new_state])
+            {
                 dp[new_state] = dp[state] + 1;
-                previous_state[new_state] = state;
+                prev_state[new_state] = state;
                 choice[new_state] = j;
             }
         }
@@ -355,31 +356,39 @@ bool process() {
     return dp[target] != INT_MAX;
 }
 
-void print_result() {
+void print_result()
+{
     vector<int> result;
     unsigned short current_state = target;
 
-    while (current_state != 0) {
-        result.push_back(choice[current_state]);// 用目标状态回溯
-        current_state = previous_state[current_state];
+    while (current_state != 0)
+    {
+        result.push_back(choice[current_state]);
+        current_state = prev_state[current_state];
     }
 
     sort(result.begin(), result.end());
 
-    for (int i = 0; i < result.size(); i++) {
+    for (int i = 0; i < result.size(); i++)
+    {
         cout << result[i];
-        if (i < result.size() - 1) {
+        if (i < result.size() - 1)
             cout << " ";
-        }
     }
     cout << endl;
 }
 
-int main() {
+int main()
+{
+    ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+
     read_input();
-    if (process()) {
+    if (process())
+    {
         print_result();
     }
+
     return 0;
 }
+
 ```
